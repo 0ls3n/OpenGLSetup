@@ -5,8 +5,6 @@
 
 int main()
 {
-    
-
     GLFWwindow* window;
 
     /* Initialize the library */

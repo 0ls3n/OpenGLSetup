@@ -25,15 +25,13 @@ unsigned int ShaderHandler::CompileShader(unsigned int type, const std::string& 
     return id; // Returns the shader we created
 }
 
-unsigned int ShaderHandler::CreateShader(const std::string& sourceFile)
+
+unsigned int ShaderHandler::CreateShader(const std::string& vertexFileSource, const std::string& fragmentFileSource)
 {
     unsigned int program = glCreateProgram(); // Creating a new instance of a openGL Shader Program
 
-    ShaderProgramSource source = ParseShader(sourceFile); // Calling a function we made, that parses shader from .shader to string
-
-    // Creating two string variables that holds the souce codes
-    std::string& vertexShader = source.vertexShader;
-    std::string& fragmentShader = source.fragmentShader;
+    const std::string& vertexShader = ParseShader(vertexFileSource); // Calling a function we made, that parses shader from .shader to string
+    const std::string& fragmentShader = ParseShader(fragmentFileSource);
 
     // Calling the CompileShader function, so it creates two instances of shaders, vertex and fragment shaders
     unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
@@ -52,9 +50,9 @@ unsigned int ShaderHandler::CreateShader(const std::string& sourceFile)
     return program; // Returns the program we created
 }
 
-ShaderProgramSource ShaderHandler::ParseShader(const std::string& filePath)
+std::string ShaderHandler::ParseShader(const std::string& sourceFile)
 {
-    std::ifstream stream(filePath); // Creating an instance of an ifstream, which reads from files
+    std::ifstream stream(sourceFile); // Creating an instance of an ifstream, which reads from files
 
     enum class ShaderType // Creating an enum so it is more readable
     {
@@ -62,22 +60,13 @@ ShaderProgramSource ShaderHandler::ParseShader(const std::string& filePath)
     };
 
     std::string line;
-    std::stringstream ss[2];
+    std::stringstream ss[1];
     ShaderType type = ShaderType::NONE;
-    while (std::getline(stream, line)) 
+    while (std::getline(stream, line))
     {
-        if (line.find("#shader") != std::string::npos)
-        {
-            if (line.find("vertex") != std::string::npos)
-                type = ShaderType::VERTEX;
-            else if (line.find("fragment") != std::string::npos)
-                type = ShaderType::FRAGMENT;
-        }
-        else 
-        {
-            ss[(int)type] << line << '\n';
-        }
+        ss[0] << line << '\n';
     }
 
-    return { ss[0].str(), ss[1].str() };
+    return ss[0].str();
 }
+

@@ -12,9 +12,9 @@
 static class ShaderHandler 
 {
 public:
-	static unsigned int CreateShader(const std::string& sourceFile);
+	static unsigned int CreateShader(const std::string& vertexFileSource, const std::string& fragmentFileSource);
 
 private:
 	static unsigned int CompileShader(unsigned int type, const std::string& source);
-	static ShaderProgramSource ParseShader(const std::string& filePath);
+	static std::string ParseShader(const std::string& sourceFile);
 };

@@ -32,5 +32,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\basic.shader" />
+    <None Include="Shaders\vertex.glsl" />
+    <None Include="Shaders\fragment.glsl" />
   </ItemGroup>
 </Project>

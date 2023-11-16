@@ -50,7 +50,7 @@ int main(void)
 
     
 
-    unsigned int shader = ShaderHandler::CreateShader("Shaders/basic.shader");
+    unsigned int shader = ShaderHandler::CreateShader("Shaders/vertex.glsl", "Shaders/fragment.glsl");
     
 
     /* Loop until the user closes the window */

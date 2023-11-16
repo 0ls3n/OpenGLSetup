@@ -7,20 +7,31 @@
 
 int main(void)
 {
-    GLFWwindow* window;
 
     /* Initialize the library */
     if (!glfwInit())
         return -1;
 
-    /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_SAMPLES, 4);
+
+    GLFWmonitor* mon = glfwGetPrimaryMonitor();
+    const GLFWvidmode* mode = glfwGetVideoMode(mon);
+
+
+    GLFWwindow* window;
+
+    //window = glfwCreateWindow(mode->width, mode->height, "Hello World", mon, NULL);
+    window = glfwCreateWindow(600, 600, "Hello World", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
         return -1;
     }
-
+    
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
 
@@ -29,43 +40,72 @@ int main(void)
         std::cout << "Error" << std::endl;
     }
 
-    float positions[6] =
+    
+    float points[9]
     {
-        -0.5f, -0.5f,
-         0.0f,  0.5f,
-         0.5f, -0.5f
+        0.0f, 0.5f, 0.0f,
+        0.5f, -0.5f, 0.0f,
+        -0.5f, -0.5f, 0.0f
     };
 
-    unsigned int vbo; // Creating an unsigned int which is holding the vertex buffer object (VBO)
-    glGenBuffers(1, &vbo); // Generates the buffer, with reference to the VBO
-    glBindBuffer(GL_ARRAY_BUFFER, vbo); // Defining which GL_ARRAY_BUFFER that is active
-    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions, GL_STATIC_DRAW); // Defining the data in the active buffer
+    float colours[9]
+    {
+        1.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 1.0f
+    };
 
-    unsigned int vao; // Creating an unsigned int which is holding the vertex array object (VAO)
-    glGenVertexArrays(1, &vao); // Generates a vertex array object with referece to the VAO
-    glBindVertexArray(vao); // Defining which VAO that is active
+    unsigned int points_vbo;
+    glGenBuffers(1, &points_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
+    glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), points, GL_STATIC_DRAW);
 
-    glEnableVertexAttribArray(0); // Enabling 
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, NULL);
+    unsigned int colours_vbo;
+    glGenBuffers(1, &colours_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, colours_vbo);
+    glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), colours, GL_STATIC_DRAW);
 
+    unsigned int vao = 0;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+    glBindBuffer(GL_ARRAY_BUFFER, colours_vbo);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+
+
+    unsigned int shader = ShaderHandler::CreateShader("Shaders/FirstShader/vertex.glsl", "Shaders/FirstShader/fragment.glsl");
     
-
-    unsigned int shader = ShaderHandler::CreateShader("Shaders/vertex.glsl", "Shaders/fragment.glsl");
-    
+    glBindAttribLocation(shader, 0, "position");
+    glBindAttribLocation(shader, 1, "vertex_colour");
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
+        
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+        glClearColor(0.1, 0.1, 0.1, 1);
         glUseProgram(shader);
         glBindVertexArray(vao);
-
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
+
+
+        if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_ESCAPE)) 
+        {
+            glfwSetWindowShouldClose(window, 1);
+        }
+
+        if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_R))
+        {
+            shader = ShaderHandler::CreateShader("Shaders/FirstShader/vertex.glsl", "Shaders/FirstShader/fragment.glsl");
+            std::cout << "Updating shader..." << std::endl;
+        }
 
         /* Poll for and process events */
         glfwPollEvents();

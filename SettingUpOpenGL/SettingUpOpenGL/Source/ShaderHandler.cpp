@@ -54,19 +54,13 @@ std::string ShaderHandler::ParseShader(const std::string& sourceFile)
 {
     std::ifstream stream(sourceFile); // Creating an instance of an ifstream, which reads from files
 
-    enum class ShaderType // Creating an enum so it is more readable
-    {
-        NONE = -1, VERTEX = 0, FRAGMENT = 1
-    };
-
     std::string line;
-    std::stringstream ss[1];
-    ShaderType type = ShaderType::NONE;
+    std::stringstream ss;
     while (std::getline(stream, line))
     {
-        ss[0] << line << '\n';
+        ss << line << '\n';
     }
 
-    return ss[0].str();
+    return ss.str();
 }
 

@@ -2,14 +2,14 @@
 
 unsigned int ShaderHandler::CompileShader(unsigned int type, const std::string& source)
 {
-    unsigned int id = glCreateShader(type);
-    const char* src = source.c_str();
-    glShaderSource(id, 1, &src, nullptr);
-    glCompileShader(id);
+    unsigned int id = glCreateShader(type); // Creating the shader instance into the unsigned int
+    const char* src = source.c_str(); // Creating a variable that holds the source file in a memory address
+    glShaderSource(id, 1, &src, nullptr); // Replaces the source code in a shader object with our shader source
+    glCompileShader(id); // Compiling the shader created
 
     int result;
-    glGetShaderiv(id, GL_COMPILE_STATUS, &result);
-    if (result == GL_FALSE) 
+    glGetShaderiv(id, GL_COMPILE_STATUS, &result); // Returns the GL_COMPILE_STATUS to the result integer
+    if (result == GL_FALSE)
     {
         int length;
         glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
@@ -22,37 +22,41 @@ unsigned int ShaderHandler::CompileShader(unsigned int type, const std::string& 
         return 0;
     }
 
-    return id;
+    return id; // Returns the shader we created
 }
 
 unsigned int ShaderHandler::CreateShader(const std::string& sourceFile)
 {
-    unsigned int program = glCreateProgram();
+    unsigned int program = glCreateProgram(); // Creating a new instance of a openGL Shader Program
 
-    ShaderProgramSource source = ParseShader(sourceFile);
+    ShaderProgramSource source = ParseShader(sourceFile); // Calling a function we made, that parses shader from .shader to string
 
+    // Creating two string variables that holds the souce codes
     std::string& vertexShader = source.vertexShader;
     std::string& fragmentShader = source.fragmentShader;
 
+    // Calling the CompileShader function, so it creates two instances of shaders, vertex and fragment shaders
     unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
     unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
 
+    // Attaching the shaders to the program we created
     glAttachShader(program, vs);
     glAttachShader(program, fs);
     glLinkProgram(program);
     glValidateProgram(program);
 
+    // When we attached the shaders to the program, the shader instances are of no use. So we delete them (Memory efficient)
     glDeleteShader(vs);
     glDeleteShader(fs);
 
-    return program;
+    return program; // Returns the program we created
 }
 
 ShaderProgramSource ShaderHandler::ParseShader(const std::string& filePath)
 {
-    std::ifstream stream(filePath);
+    std::ifstream stream(filePath); // Creating an instance of an ifstream, which reads from files
 
-    enum class ShaderType
+    enum class ShaderType // Creating an enum so it is more readable
     {
         NONE = -1, VERTEX = 0, FRAGMENT = 1
     };

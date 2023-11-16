@@ -36,22 +36,31 @@ int main(void)
          0.5f, -0.5f
     };
 
-    unsigned int vbo;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions, GL_STATIC_DRAW);
+    unsigned int vbo; // Creating an unsigned int which is holding the vertex buffer object (VBO)
+    glGenBuffers(1, &vbo); // Generates the buffer, with reference to the VBO
+    glBindBuffer(GL_ARRAY_BUFFER, vbo); // Defining which GL_ARRAY_BUFFER that is active
+    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions, GL_STATIC_DRAW); // Defining the data in the active buffer
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+    unsigned int vao; // Creating an unsigned int which is holding the vertex array object (VAO)
+    glGenVertexArrays(1, &vao); // Generates a vertex array object with referece to the VAO
+    glBindVertexArray(vao); // Defining which VAO that is active
+
+    glEnableVertexAttribArray(0); // Enabling 
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, NULL);
+
+    
 
     unsigned int shader = ShaderHandler::CreateShader("Shaders/basic.shader");
-    glUseProgram(shader);
+    
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glUseProgram(shader);
+        glBindVertexArray(vao);
 
         glDrawArrays(GL_TRIANGLES, 0, 3);
 

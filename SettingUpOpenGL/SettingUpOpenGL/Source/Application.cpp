@@ -25,7 +25,7 @@ int main(void)
     GLFWwindow* window;
 
     //window = glfwCreateWindow(mode->width, mode->height, "Hello World", mon, NULL);
-    window = glfwCreateWindow(600, 600, "Hello World", NULL, NULL);
+    window = glfwCreateWindow(800, 600, "Hello World", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -35,51 +35,70 @@ int main(void)
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
 
+    glfwSwapInterval(1);
+
     if (glewInit() != GLEW_OK)
     {
         std::cout << "Error" << std::endl;
     }
 
     
-    float points[9]
+    float points[8]
     {
-        0.0f, 0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        -0.5f, -0.5f, 0.0f
+        -0.5f, -0.5f, // 0
+        0.5f, -0.5f,  // 1
+        0.5f, 0.5f,   // 2
+        -0.5f, 0.5f   // 3
     };
 
-    float colours[9]
+    float colors[12]
     {
-        1.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 1.0f
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0,
+        0.0, 0.0, 1.0,
+        1.0, 0.0, 1.0
+    };
+
+    unsigned int indices[6]
+    {
+        0, 1, 2,
+        2, 3, 0
     };
 
     unsigned int points_vbo;
     glGenBuffers(1, &points_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-    glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), points, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(float), points, GL_STATIC_DRAW);
 
-    unsigned int colours_vbo;
-    glGenBuffers(1, &colours_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, colours_vbo);
-    glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), colours, GL_STATIC_DRAW);
+    unsigned int color_vbo;
+    glGenBuffers(1, &color_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, color_vbo);
+    glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), colors, GL_STATIC_DRAW);
 
     unsigned int vao = 0;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
+
     glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-    glBindBuffer(GL_ARRAY_BUFFER, colours_vbo);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+
+    glBindBuffer(GL_ARRAY_BUFFER, color_vbo);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
-
-
-    unsigned int shader = ShaderHandler::CreateShader("Shaders/FirstShader/vertex.glsl", "Shaders/FirstShader/fragment.glsl");
     
+    unsigned int ibo;
+    glGenBuffers(1, &ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
+
+    
+    unsigned int shader = ShaderHandler::CreateShader("Shaders/FirstShader/vertex.glsl", "Shaders/FirstShader/fragment.glsl");
+    glUseProgram(shader);
+
     glBindAttribLocation(shader, 0, "position");
-    glBindAttribLocation(shader, 1, "vertex_colour");
+    glBindAttribLocation(shader, 1, "colors");
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -88,9 +107,13 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(0.1, 0.1, 0.1, 1);
-        glUseProgram(shader);
+        
         glBindVertexArray(vao);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+
+       
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
+        
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
